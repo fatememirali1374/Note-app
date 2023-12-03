@@ -1,10 +1,11 @@
 export default class NotesView {
 constructor(root, handlers){
 this.root=root;
-const {onNoteAdd, onNoteEdit}=handlers;
+const {onNoteAdd, onNoteEdit,onNoteSelect,onNoteDelete}=handlers;
 this.onNoteAdd=onNoteAdd;
 this.onNoteEdit=onNoteEdit;
-
+this.onNoteSelect=onNoteSelect;
+this.onNoteDelete=onNoteDelete;
 this.root.innerHTML=`
 <div class="notes__sidebar">
 <div class="notes__logo">NOTE APP</div>
@@ -31,5 +32,67 @@ this.onNoteAdd()
         this.onNoteEdit(newTitle, newBody)
     })
 });
+
+// hide notes preview in first loading
+this.updateNptePreviewVisibility(false)
+};
+
+_creatListItemHTML(id, title, body, updated){
+    MAX_BODY_LENGTH=50;
+    return`
+    <li class="notes__list-item"data-note-id="${id}">
+           <div class="notes__item-header">
+           <div class="notes__small-title">${title} </div>
+           <span class="notes__list-trash"data-note-id="${id}">
+           <i class=" far fa-trash-alt"></i>          </span>
+           </div>
+            <div class="notes__small-body">
+            ${body.substring(0, MAX_BODY_LENGTH)}
+            ${body.length>MAX_BODY_LENGTH?"...":""}</div>
+            <div class="notes__small-updated">
+            ${new Date(updated).toLocaleString("en", 
+            {dateStyle:"full",timeStyle:"short"})}</div>
+          </li>
+    `
 }
+updatedNoteList(notes){
+    const notesContainer= this.root.querySelector(".notes__list");
+
+    // empty noteList
+    notesContainer.innerHTML="";
+    let notesLis="";
+    for(const note of notes) {
+        const{id, title, body, updated}= note;
+        const html= this._creatListItemHTML(id, title, body, updated);
+        notesLis+=html;
+    }
+    notesContainer.innerHTML=notesLis;
+    notesContainer.querySelectorAll(".notes__list-item").forEach((noteItem)=>{
+        noteItem.addEventListener("click", ()=>{
+            this.onNoteSelect(noteItem.dataset.noteId)
+        })
+    })
+notesContainer.querySelectorAll(".notes__list-trash")
+.forEach((noteItem)=>{
+    noteItem.addEventListener("click", (e)=>
+   {e.stopPropagation();
+     this.onNoteDelete(noteItem.dataset.noteId)})
+})
 }
+updateActiveNote(note){
+    this.root.querySelector(".notes__title").value=note.title;
+    this.root.querySelector(".notes__body").value=note.body;
+
+// add selected class:
+this.root.querySelectorAll(".notes__list-item").forEach(item=>{
+    item.classList.remove("notes__list-item--selected")
+}
+)
+
+this.root.querySelector(`.notes__list-item[data-note-id="${note.id}"]`)
+.classList.add("notes__list-item--selected")
+}
+updateNptePreviewVisibility(visible){
+    this.root.querySelector(".notes__preview").style.visibility=visible? "visible":"hideen"
+}
+};
