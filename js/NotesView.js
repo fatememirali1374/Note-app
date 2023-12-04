@@ -38,7 +38,7 @@ this.updateNptePreviewVisibility(false)
 };
 
 _creatListItemHTML(id, title, body, updated){
-    MAX_BODY_LENGTH=50;
+   const MAX_BODY_LENGTH=50;
     return`
     <li class="notes__list-item"data-note-id="${id}">
            <div class="notes__item-header">
@@ -55,7 +55,7 @@ _creatListItemHTML(id, title, body, updated){
           </li>
     `
 }
-updatedNoteList(notes){
+updateNoteList(notes){
     const notesContainer= this.root.querySelector(".notes__list");
 
     // empty noteList
